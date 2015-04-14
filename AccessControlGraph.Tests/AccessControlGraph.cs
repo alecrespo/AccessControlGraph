@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using NUnit.Framework;
 using QuickGraph;
 
@@ -34,6 +36,8 @@ namespace AccessControlGraph.Tests
 
             //now we have 3-level tree with 4 subnodes on each node;
             //21 nodes, 20 edges
+            Assert.True(graph.Vertices.Count() == 21);
+            Assert.True(graph.Edges.Count() == 20);
         }
 
         [TearDown]
@@ -85,6 +89,37 @@ namespace AccessControlGraph.Tests
 
             var uncachedsubgraph = graph.GetChildGraph(v => v.Id % 2 == 0); //uncached due to anonimous function != testFunc
             Assert.False(subgraph.Equals(uncachedsubgraph));
+        }
+
+        [Test]
+        public void CheckDataUpdatesOnInsert()
+        {
+            var subgraph = graph.GetChildGraph(v => v.Id % 2 == 0);
+            var subgraph2 = graph.GetChildGraph(v => v.Id % 2 == 1);
+
+            graph.Vertices.First(x => x.Id == 12).Testdata = "12";
+            //insert
+            var list = new List<Edge<TestNode>>();
+            var node1 = new TestNode(12){ Testdata = "13"};  //MUST NOT UPDATE WITH NEW DATA
+            var node2 = new TestNode(126){ Testdata = "126"};
+            var edge = new Edge<TestNode>(node1, node2);
+            list.Add(edge);
+            graph.AddVerticesAndEdgeRange(list);
+
+            Assert.True(graph.Vertices.Count() == 22);
+            Assert.True(graph.Edges.Count() == 21);
+            Assert.True(subgraph.Vertices.Count() == 11);
+            Assert.True(subgraph.Edges.Count() == 5);
+            Assert.True(subgraph2.Vertices.Count() == 11);
+            Assert.True(subgraph2.Edges.Count() == 6);
+
+            Assert.True(graph.Vertices.First(x => x.Id == 126).Testdata == "126");
+            Assert.True(subgraph.Vertices.First(x => x.Id == 126).Testdata == "126");            
+            Assert.True(subgraph2.Vertices.Count(x => x.Id == 126)==0);
+
+            Assert.True(graph.Vertices.First(x => x.Id == 12).Testdata == "12");
+            Assert.True(subgraph.Vertices.First(x => x.Id == 12).Testdata == "12");
+            Assert.True(subgraph2.Vertices.Count(x => x.Id == 12) == 0);
         }
     }
 }

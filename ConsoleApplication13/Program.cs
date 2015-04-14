@@ -1,17 +1,11 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Diagnostics;
 using System.Linq;
-using System.Linq.Expressions;
-using System.Reflection;
 using AccessControlGraph;
 using QuickGraph;
-using ReactGraph.Graph;
 using VMware.Vim;
-using VimExtensions;
 
 namespace ConsoleApplication13
 {
@@ -100,8 +94,9 @@ namespace ConsoleApplication13
             {
                 Action<Type> fetch = type =>
                 {
-                    var vms = client.FindEntityViews(type, client.ServiceContent.RootFolder, null, null);
                     sw.Start();
+                    var vms = client.FindEntityViews(type, client.ServiceContent.RootFolder, null, null);
+                    
                     vms.ForEach(evb =>
                     {
                         var node = new VMWareNode(evb.MoRef) {Labels = new BitVector32(16), SecLevel = 0};
@@ -118,7 +113,7 @@ namespace ConsoleApplication13
                     typeof (ResourcePool),
                     typeof (Datastore)
                 }.ForEach(fetch);
-                Console.WriteLine("Added all nodes from VCenter to graph:" + sw.ElapsedTicks);
+                Console.WriteLine("Added all nodes from VCenter to graph:" + sw.ElapsedMilliseconds);
             }
 
             //Выборка обьектов из графа, а также связанных с ними обьектов.
