@@ -1,12 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AccessControlGraph
 {
+    /// <summary>
+    /// Helper for replacing parameter values in Expressions with constants
+    /// </summary>
     public class ReplaceExpressionVisitor : ExpressionVisitor
     {
         public Dictionary<string, object> Replaces = new Dictionary<string, object>();

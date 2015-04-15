@@ -143,6 +143,33 @@ namespace ConsoleApplication13
                 Console.WriteLine("Get Subtree cached:" + sw.ElapsedTicks);
             }
 
+            //кеширование по параметру
+            {
+                Expression<Func<string,VertexPredicate<VMWareNode>>> predicate = i => x => x.Type == i;
+                sw.Restart();
+                var types = new List<string>{ "Datacenter", "ComputeResource", "VirtualMachine", "ResourcePool", "Datastore" };
+                types.ForEach(type =>
+                {
+                    var rev = new ReplaceExpressionVisitor();
+                    rev.Replaces["i"] = type;
+                    var res = (Expression<VertexPredicate<VMWareNode>>) rev.Visit(predicate.Body);
+                    var subgraphnotcached = graph.GetChildGraph(res);
+                });
+                sw.Stop();
+                Console.WriteLine("Get Subtree by type not cached:" + sw.ElapsedTicks);
+
+                sw.Restart();
+                types.ForEach(type =>
+                {
+                    var rev = new ReplaceExpressionVisitor();
+                    rev.Replaces["i"] = type;
+                    var res = (Expression<VertexPredicate<VMWareNode>>)rev.Visit(predicate.Body);
+                    var subgraphcached = graph.GetChildGraph(res);
+                });
+                sw.Stop();
+                Console.WriteLine("Get Subtree by type cached:" + sw.ElapsedTicks);
+            }
+
             //Удаление обьекта из графа, а также всех его связей
             {
                 sw.Restart();
