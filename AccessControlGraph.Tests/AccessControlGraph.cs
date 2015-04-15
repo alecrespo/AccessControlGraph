@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using NUnit.Framework;
 using QuickGraph;
@@ -67,12 +69,12 @@ namespace AccessControlGraph.Tests
         {
             //change data before subgraph creation
             graph.Vertices.First(x => x.Id == 12).Testdata = "12";
-            
+
             var subgraph = graph.GetChildGraph(v => v.Id % 2 == 0);
 
             //change data after subgraph creation 
             graph.Vertices.First(x => x.Id == 122).Testdata = "122";
-            
+
             //make requests for subgraph nodes data;
             Assert.True(subgraph.Vertices.First(x => x.Id == 12).Testdata == "12");
             Assert.True(subgraph.Vertices.First(x => x.Id == 122).Testdata == "122");
@@ -81,24 +83,46 @@ namespace AccessControlGraph.Tests
         [Test]
         public void check_cache()
         {
-            VertexPredicate<TestNode> testFunc = v => v.Id % 2 == 0;
+            Expression<VertexPredicate<TestNode>> testFunc = v => v.Id % 2 == 0;
             var subgraph = graph.GetChildGraph(testFunc);
 
             var cachedsubgraph = graph.GetChildGraph(testFunc);
             Assert.True(subgraph.Equals(cachedsubgraph));
 
-            var uncachedsubgraph = graph.GetChildGraph(v => v.Id % 2 == 0); //uncached due to anonimous function != testFunc
-            Assert.False(subgraph.Equals(uncachedsubgraph));
+            //as you can see cache works even with virtually same anonimous function
+            //implicitly converts function to expression, end they are the same.
+            var uncachedsubgraph = graph.GetChildGraph(v => v.Id % 2 == 0); 
+            Assert.True(subgraph.Equals(uncachedsubgraph));
         }
 
+        public class ReplaceVisitor<T> : ExpressionVisitor
+        {
+            private readonly T _instance;
+
+            public ReplaceVisitor(T instance)
+            {
+                _instance = instance;
+            }
+
+            protected override Expression VisitParameter(ParameterExpression node)
+            {
+                if(node.Name=="x")
+                    return Expression.Constant(_instance);
+                return base.VisitParameter(node);
+            }
+        }
         [Test]
         public void child_graph_cached_on_predicate_result()
         {
-            for (int i = 2; i < 10; i++)
-            {
-                var sg = graph.GetChildGraph(v => v.Id % i == 0);
-            }
-            Assert.That(graph.Cache.Count>1,"Caching is not generating new elements based on predicate result");
+            for (var j = 0; j < 2; j++)
+                for (var i = 2; i < 10; i++)
+                {
+                    Expression<Func<int, VertexPredicate<TestNode>>> expr = x => node => node.Id % x == 0;
+                    var replacedExpr = new ReplaceVisitor<int>(i).Visit(expr.Body);
+                    var resultExpr = (Expression<VertexPredicate<TestNode>>)replacedExpr;
+                    graph.GetChildGraph(resultExpr);
+                }
+            Assert.That(graph.Cache.Count==8,"Caching done wrong based on predicate result");
         }
 
 
@@ -106,39 +130,8 @@ namespace AccessControlGraph.Tests
         public void data_updates_on_insert()
         {
             var a = new VertexPredicate<TestNode>(v => v.Id % 2 == 1);
-            
 
-            var subgraph = graph.GetChildGraph(v => v.Id % 2 == 0);
-            var subgraph2 = graph.GetChildGraph(v => v.Id % 2 == 1);
 
-            graph.Vertices.First(x => x.Id == 12).Testdata = "12";
-            //insert
-            var list = new List<Edge<TestNode>>();
-            var node1 = new TestNode(12){ Testdata = "13"};  //MUST NOT UPDATE WITH NEW DATA
-            var node2 = new TestNode(126){ Testdata = "126"};
-            var edge = new Edge<TestNode>(node1, node2);
-            list.Add(edge);
-            graph.AddVerticesAndEdgeRange(list);
-
-            Assert.True(graph.Vertices.Count() == 22);
-            Assert.True(graph.Edges.Count() == 21);
-            Assert.True(subgraph.Vertices.Count() == 11);
-            Assert.True(subgraph.Edges.Count() == 5);
-            Assert.True(subgraph2.Vertices.Count() == 11);
-            Assert.True(subgraph2.Edges.Count() == 6);
-
-            Assert.True(graph.Vertices.First(x => x.Id == 126).Testdata == "126");
-            Assert.True(subgraph.Vertices.First(x => x.Id == 126).Testdata == "126");            
-            Assert.True(subgraph2.Vertices.Count(x => x.Id == 126)==0);
-
-            Assert.True(graph.Vertices.First(x => x.Id == 12).Testdata == "12");
-            Assert.True(subgraph.Vertices.First(x => x.Id == 12).Testdata == "12");
-            Assert.True(subgraph2.Vertices.Count(x => x.Id == 12) == 0);
-        }
-
-        [Test]
-        public void data_updates_on_delete()
-        {
             var subgraph = graph.GetChildGraph(v => v.Id % 2 == 0);
             var subgraph2 = graph.GetChildGraph(v => v.Id % 2 == 1);
 
@@ -166,5 +159,36 @@ namespace AccessControlGraph.Tests
             Assert.True(subgraph.Vertices.First(x => x.Id == 12).Testdata == "12");
             Assert.True(subgraph2.Vertices.Count(x => x.Id == 12) == 0);
         }
+
+        //[Test]
+        //public void data_updates_on_delete()
+        //{
+        //    var subgraph = graph.GetChildGraph(v => v.Id % 2 == 0);
+        //    var subgraph2 = graph.GetChildGraph(v => v.Id % 2 == 1);
+
+        //    graph.Vertices.First(x => x.Id == 12).Testdata = "12";
+        //    //insert
+        //    var list = new List<Edge<TestNode>>();
+        //    var node1 = new TestNode(12) { Testdata = "13" };  //MUST NOT UPDATE WITH NEW DATA
+        //    var node2 = new TestNode(126) { Testdata = "126" };
+        //    var edge = new Edge<TestNode>(node1, node2);
+        //    list.Add(edge);
+        //    graph.AddVerticesAndEdgeRange(list);
+
+        //    Assert.True(graph.Vertices.Count() == 22);
+        //    Assert.True(graph.Edges.Count() == 21);
+        //    Assert.True(subgraph.Vertices.Count() == 11);
+        //    Assert.True(subgraph.Edges.Count() == 5);
+        //    Assert.True(subgraph2.Vertices.Count() == 11);
+        //    Assert.True(subgraph2.Edges.Count() == 6);
+
+        //    Assert.True(graph.Vertices.First(x => x.Id == 126).Testdata == "126");
+        //    Assert.True(subgraph.Vertices.First(x => x.Id == 126).Testdata == "126");
+        //    Assert.True(subgraph2.Vertices.Count(x => x.Id == 126) == 0);
+
+        //    Assert.True(graph.Vertices.First(x => x.Id == 12).Testdata == "12");
+        //    Assert.True(subgraph.Vertices.First(x => x.Id == 12).Testdata == "12");
+        //    Assert.True(subgraph2.Vertices.Count(x => x.Id == 12) == 0);
+        //}
     }
 }

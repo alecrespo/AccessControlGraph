@@ -1,10 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using QuickGraph;
 
 namespace AccessControlGraph
 {
+    internal class CacheValue<T> where T : NodeBase
+    {
+        public VertexPredicate<T> Predicate { get; set; }
+        public AccessControlGraph<T> Graph { get; set; }
+    }
     /// <summary>
     /// 
     /// </summary>
@@ -13,27 +19,27 @@ namespace AccessControlGraph
         where T : NodeBase
     {
         //TODO: Сделать чтобы со временем кеш протухал и удалялся.
-        internal readonly Dictionary<VertexPredicate<T>, AccessControlGraph<T>> Cache = new Dictionary<VertexPredicate<T>, AccessControlGraph<T>>();       
+        internal readonly Dictionary<string, CacheValue<T>> Cache = new Dictionary<string, CacheValue<T>>();       
 
         public AccessControlGraphRoot()
-        {            
+        {
             Graph.EdgeAdded += e => Cache.ToList().ForEach(acg =>
             {
-                if(acg.Key(e.Source) && acg.Key(e.Target))
-                    acg.Value.Graph.AddVerticesAndEdge(e);
+                if (acg.Value.Predicate(e.Source) && acg.Value.Predicate(e.Target))
+                    acg.Value.Graph.Graph.AddVerticesAndEdge(e);
             });
             Graph.EdgeRemoved += e => Cache.ToList().ForEach(acg =>
             {
-                acg.Value.Graph.RemoveEdge(e);                
+                acg.Value.Graph.Graph.RemoveEdge(e);
             });
             Graph.VertexAdded += v => Cache.ToList().ForEach(acg =>
             {
-                if(acg.Key(v)) 
-                    acg.Value.Graph.AddVertex(v);
+                if (acg.Value.Predicate(v))
+                    acg.Value.Graph.Graph.AddVertex(v);
             });
             Graph.VertexRemoved += v => Cache.ToList().ForEach(acg =>
             {
-                acg.Value.Graph.RemoveVertex(v);
+                acg.Value.Graph.Graph.RemoveVertex(v);
             });
         }
 
@@ -60,19 +66,24 @@ namespace AccessControlGraph
         /// возвращаемые подграфы кешируются по предикату.
         /// </summary>
         /// <returns>Подграф, доступны операции только для чтения</returns>
-        public AccessControlGraph<T> GetChildGraph(VertexPredicate<T> v)
+        public AccessControlGraph<T> GetChildGraph(Expression<VertexPredicate<T>> v)
         {
-            if (Cache.ContainsKey(v))
-                return Cache[v];
+            if (Cache.ContainsKey(v.ToString()))
+                return Cache[v.ToString()].Graph;
+            var predicate = v.Compile();
 
             //clone parent graph
             var acg = new AccessControlGraph<T>();
             acg.Graph.AddVerticesAndEdgeRange(Edges.ToList());
 
             //filter graph by predicate
-            acg.Graph.RemoveVertexIf(x => !v(x));
+            acg.Graph.RemoveVertexIf(x => !predicate(x));
 
-            Cache.Add(v, acg);
+            Cache.Add(v.ToString(), new CacheValue<T>
+            {
+                Graph = acg, 
+                Predicate = predicate
+            });
 
             return acg;
         }
