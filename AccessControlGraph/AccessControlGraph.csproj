@@ -55,6 +55,7 @@
     <Compile Include="AccessControlGraphRoot.cs" />
     <Compile Include="NodeBase.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ReplaceExpressionVisitor.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
