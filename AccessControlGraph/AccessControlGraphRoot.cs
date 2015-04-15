@@ -13,25 +13,25 @@ namespace AccessControlGraph
         where T : NodeBase
     {
         //TODO: Сделать чтобы со временем кеш протухал и удалялся.
-        readonly Dictionary<VertexPredicate<T>, AccessControlGraph<T>> _cache = new Dictionary<VertexPredicate<T>, AccessControlGraph<T>>();
+        internal readonly Dictionary<VertexPredicate<T>, AccessControlGraph<T>> Cache = new Dictionary<VertexPredicate<T>, AccessControlGraph<T>>();       
 
         public AccessControlGraphRoot()
-        {
-            Graph.EdgeAdded += e => _cache.ToList().ForEach(acg =>
+        {            
+            Graph.EdgeAdded += e => Cache.ToList().ForEach(acg =>
             {
                 if(acg.Key(e.Source) && acg.Key(e.Target))
                     acg.Value.Graph.AddVerticesAndEdge(e);
             });
-            Graph.EdgeRemoved += e => _cache.ToList().ForEach(acg =>
+            Graph.EdgeRemoved += e => Cache.ToList().ForEach(acg =>
             {
                 acg.Value.Graph.RemoveEdge(e);                
             });
-            Graph.VertexAdded += v => _cache.ToList().ForEach(acg =>
+            Graph.VertexAdded += v => Cache.ToList().ForEach(acg =>
             {
                 if(acg.Key(v)) 
                     acg.Value.Graph.AddVertex(v);
             });
-            Graph.VertexRemoved += v => _cache.ToList().ForEach(acg =>
+            Graph.VertexRemoved += v => Cache.ToList().ForEach(acg =>
             {
                 acg.Value.Graph.RemoveVertex(v);
             });
@@ -62,8 +62,8 @@ namespace AccessControlGraph
         /// <returns>Подграф, доступны операции только для чтения</returns>
         public AccessControlGraph<T> GetChildGraph(VertexPredicate<T> v)
         {
-            if (_cache.ContainsKey(v))
-                return _cache[v];
+            if (Cache.ContainsKey(v))
+                return Cache[v];
 
             //clone parent graph
             var acg = new AccessControlGraph<T>();
@@ -72,7 +72,7 @@ namespace AccessControlGraph
             //filter graph by predicate
             acg.Graph.RemoveVertexIf(x => !v(x));
 
-            _cache.Add(v, acg);
+            Cache.Add(v, acg);
 
             return acg;
         }
