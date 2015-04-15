@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Diagnostics;
 using System.Linq;
+using System.Linq.Expressions;
 using AccessControlGraph;
 using QuickGraph;
 using VMware.Vim;
@@ -131,7 +132,7 @@ namespace ConsoleApplication13
 
             //Выборка подграфа
             {
-                VertexPredicate<VMWareNode> predicate = x => x.SecLevel == 12;
+                Expression<VertexPredicate<VMWareNode>> predicate = x => x.SecLevel == 12;
                 sw.Restart();
                 var subgraph = graph.GetChildGraph(predicate);
                 sw.Stop();
