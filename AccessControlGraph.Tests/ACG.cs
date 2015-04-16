@@ -9,7 +9,7 @@ using Assert = NUnit.Framework.Assert;
 namespace AccessControlGraph.Tests
 {
     [TestFixture]
-    public class AccessControlGraph
+    public class ACG
     {
         private AccessControlGraphRoot<TestNode> _graph;
             

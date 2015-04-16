@@ -56,14 +56,15 @@ namespace AccessControlGraph
         /// </summary>
         /// <param name="v"></param>
         /// <returns></returns>
-        public bool RemoveVertex(T v)
+        public void RemoveVertex(T v)
         {
-            return Graph.RemoveVertex(v);
+            if(Graph.ContainsVertex(v))
+                Graph.RemoveVertex(v);
         }
 
         /// <summary>
         /// Получить подграф, вершины которого удовлетворяют условию.
-        /// возвращаемые подграфы кешируются по предикату.
+        /// возвращаемые подграфы кешируются по LINQ expression.
         /// </summary>
         /// <returns>Подграф, доступны операции только для чтения</returns>
         public AccessControlGraph<T> GetChildGraph(Expression<VertexPredicate<T>> v)
