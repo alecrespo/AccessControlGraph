@@ -135,51 +135,37 @@ namespace AccessControlGraph.Tests
             list.Add(edge);
             _graph.AddVerticesAndEdgeRange(list);
 
-            Assert.True(_graph.Vertices.Count() == 22);
-            Assert.True(_graph.Edges.Count() == 21);
-            Assert.True(subgraph.Vertices.Count() == 11);
-            Assert.True(subgraph.Edges.Count() == 5);
-            Assert.True(subgraph2.Vertices.Count() == 11);
-            Assert.True(subgraph2.Edges.Count() == 6);
+            Assert.That(_graph.Vertices.Count() == 22);
+            Assert.That(_graph.Edges.Count() == 21);
+            Assert.That(subgraph.Vertices.Count() == 11);
+            Assert.That(subgraph.Edges.Count() == 5);
+            Assert.That(subgraph2.Vertices.Count() == 11);
+            Assert.That(subgraph2.Edges.Count() == 6);
 
-            Assert.True(_graph.Vertices.First(x => x.Id == 126).Testdata == "126");
-            Assert.True(subgraph.Vertices.First(x => x.Id == 126).Testdata == "126");
-            Assert.True(subgraph2.Vertices.Count(x => x.Id == 126) == 0);
+            Assert.That(_graph.Vertices.First(x => x.Id == 126).Testdata == "126");
+            Assert.That(subgraph.Vertices.First(x => x.Id == 126).Testdata == "126");
+            Assert.That(subgraph2.Vertices.Count(x => x.Id == 126) == 0);
 
-            Assert.True(_graph.Vertices.First(x => x.Id == 12).Testdata == "12");
-            Assert.True(subgraph.Vertices.First(x => x.Id == 12).Testdata == "12");
-            Assert.True(subgraph2.Vertices.Count(x => x.Id == 12) == 0);
+            Assert.That(_graph.Vertices.First(x => x.Id == 12).Testdata == "12");
+            Assert.That(subgraph.Vertices.First(x => x.Id == 12).Testdata == "12");
+            Assert.That(subgraph2.Vertices.Count(x => x.Id == 12) == 0);
         }
 
-        //[Test]
-        //public void data_updates_on_delete()
-        //{
-        //    var subgraph = graph.GetChildGraph(v => v.Id % 2 == 0);
-        //    var subgraph2 = graph.GetChildGraph(v => v.Id % 2 == 1);
+        [Test]
+        public void data_updates_on_delete()
+        {
+            var subgraph = _graph.GetChildGraph(v => v.Id % 2 == 0);
+            var subgraph2 = _graph.GetChildGraph(v => v.Id % 2 == 1);
 
-        //    graph.Vertices.First(x => x.Id == 12).Testdata = "12";
-        //    //insert
-        //    var list = new List<Edge<TestNode>>();
-        //    var node1 = new TestNode(12) { Testdata = "13" };  //MUST NOT UPDATE WITH NEW DATA
-        //    var node2 = new TestNode(126) { Testdata = "126" };
-        //    var edge = new Edge<TestNode>(node1, node2);
-        //    list.Add(edge);
-        //    graph.AddVerticesAndEdgeRange(list);
+            //delete
+            _graph.RemoveVertex(new TestNode(12));
 
-        //    Assert.True(graph.Vertices.Count() == 22);
-        //    Assert.True(graph.Edges.Count() == 21);
-        //    Assert.True(subgraph.Vertices.Count() == 11);
-        //    Assert.True(subgraph.Edges.Count() == 5);
-        //    Assert.True(subgraph2.Vertices.Count() == 11);
-        //    Assert.True(subgraph2.Edges.Count() == 6);
-
-        //    Assert.True(graph.Vertices.First(x => x.Id == 126).Testdata == "126");
-        //    Assert.True(subgraph.Vertices.First(x => x.Id == 126).Testdata == "126");
-        //    Assert.True(subgraph2.Vertices.Count(x => x.Id == 126) == 0);
-
-        //    Assert.True(graph.Vertices.First(x => x.Id == 12).Testdata == "12");
-        //    Assert.True(subgraph.Vertices.First(x => x.Id == 12).Testdata == "12");
-        //    Assert.True(subgraph2.Vertices.Count(x => x.Id == 12) == 0);
-        //}
+            Assert.That(_graph.Vertices.Count() == 20);
+            Assert.That(_graph.Edges.Count() == 15);
+            Assert.That(subgraph.Vertices.Count() == 9);
+            Assert.That(subgraph.Edges.Count() == 2);
+            Assert.That(subgraph2.Vertices.Count() == 11);
+            Assert.That(subgraph2.Edges.Count() == 6);
+        }
     }
 }

@@ -38,7 +38,8 @@ namespace AccessControlGraph
             });
             Graph.VertexRemoved += v => Cache.ToList().ForEach(acg =>
             {
-                acg.Value.Graph.Graph.RemoveVertex(v);
+                if(acg.Value.Graph.Graph.ContainsVertex(v))
+                    acg.Value.Graph.Graph.RemoveVertex(v);
             });
         }
 
