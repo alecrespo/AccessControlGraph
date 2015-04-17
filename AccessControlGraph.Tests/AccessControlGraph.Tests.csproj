@@ -68,6 +68,7 @@
   <ItemGroup>
     <Compile Include="ACG.cs" />
     <Compile Include="ACGPerformance.cs" />
+    <Compile Include="Properties\Annotations.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TestNode.cs" />
   </ItemGroup>

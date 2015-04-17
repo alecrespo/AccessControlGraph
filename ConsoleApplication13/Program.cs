@@ -1,27 +1,49 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Runtime.CompilerServices;
 using AccessControlGraph;
+using ConsoleApplication13.Annotations;
 using QuickGraph;
 using VMware.Vim;
 
 namespace ConsoleApplication13
 {
-    public class VMWareNode : NodeBase
+    public class VMWareNode : NodeBase, INotifyPropertyChanged
     {
         public readonly string Id;
 
         public readonly string Type;
 
-        public int ?SecLevel;
+        private int? _secLevel;
+
+        public int? SecLevel
+        {
+            get { return _secLevel; }
+            set { 
+                _secLevel = value; 
+                OnPropertyChanged();
+            }
+        }
+
+        private BitVector32? _labels;
 
         /// <summary>
         /// Предполагаем что меток не будет больше 32 штук. Если будет, то надо это менять на BitArray. Но будет медленнее, печалька.
         /// </summary>
-        public BitVector32 ?Labels;
+        public BitVector32? Labels
+        {
+            get { return _labels; }
+            set
+            {
+                _labels = value;
+                OnPropertyChanged();
+            }
+        }
 
         public VMWareNode(ManagedObjectReference moref)
         {
@@ -36,6 +58,15 @@ namespace ConsoleApplication13
         public override int GetHashCode()
         {
             return Id.GetHashCode();
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        [NotifyPropertyChangedInvocator]
+        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        {
+            PropertyChangedEventHandler handler = PropertyChanged;
+            if (handler != null) handler(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 
@@ -79,9 +110,9 @@ namespace ConsoleApplication13
     class Program
     {
         private static string
-            serviceUrl = @"https://10.72.14.25:80/sdk",
+            serviceUrl = @"https://10.72.10.128:80/sdk",
             username = @"administrator@vsphere.local",
-            password = @"Gazprom*123";
+            password = @"Gazprom09";
 
         static void Main(string[] args)
         {
@@ -101,7 +132,7 @@ namespace ConsoleApplication13
                     vms.ForEach(evb =>
                     {
                         var node = new VMWareNode(evb.MoRef) {Labels = new BitVector32(16), SecLevel = 0};
-                        var edges = evb.GetRefNodes().ToList().ConvertAll(x => new QuickGraph.Edge<VMWareNode>(node, x));
+                        var edges = evb.GetRefNodes().ToList().ConvertAll(x => new Edge<VMWareNode>(node, x));
                         graph.AddVerticesAndEdgeRange(edges);
                     });
                     sw.Stop();

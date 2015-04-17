@@ -167,5 +167,41 @@ namespace AccessControlGraph.Tests
             Assert.That(subgraph2.Vertices.Count() == 11);
             Assert.That(subgraph2.Edges.Count() == 6);
         }
+
+        [Test]
+        public void subgraph_updates_on_data_change()
+        {
+            //updating testdata on nodes(set odd and even string)
+            foreach (var testNode in _graph.Vertices)
+                testNode.Testdata = testNode.Id%2 == 0 ? "even" : "odd";
+
+            var subgraph = _graph.GetChildGraph(v => v.Testdata == "even");
+            var subgraph2 = _graph.GetChildGraph(v => v.Testdata == "odd");
+
+            Assert.True(subgraph.Vertices.Count() == 10);
+            Assert.True(subgraph.Edges.Count() == 4);
+
+            Assert.True(subgraph2.Vertices.Count() == 11);
+            Assert.True(subgraph2.Edges.Count() == 6);
+
+            //setting testdata fo 12 node to "odd" must reconfigure child graph edges and nodes;
+            _graph.Vertices.First(x => x.Id == 12).Testdata = "odd"; 
+
+            Assert.True(subgraph.Vertices.Count() == 9);
+            Assert.True(subgraph.Edges.Count() == 2);
+
+            Assert.True(subgraph2.Vertices.Count() == 12);
+            Assert.True(subgraph2.Edges.Count() == 9);
+
+            //setting testdata fo 12 node to "strange" must eliminate this node and it's edges from both childgraphs
+            _graph.Vertices.First(x => x.Id == 12).Testdata = "strange"; 
+
+            Assert.True(subgraph.Vertices.Count() == 9);
+            Assert.True(subgraph.Edges.Count() == 2);
+
+            Assert.True(subgraph2.Vertices.Count() == 11);
+            Assert.True(subgraph2.Edges.Count() == 6);
+
+        }
     }
 }

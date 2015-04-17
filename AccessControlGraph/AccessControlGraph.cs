@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.ComponentModel;
 using QuickGraph;
 
 namespace AccessControlGraph
@@ -8,7 +9,7 @@ namespace AccessControlGraph
     /// </summary>
     /// <typeparam name="T"></typeparam>
     public class AccessControlGraph<T> 
-        where T : NodeBase
+        where T : NodeBase, INotifyPropertyChanged
     {
         internal readonly UndirectedGraph<T, Edge<T>> Graph = new UndirectedGraph<T, Edge<T>>(false);
 
