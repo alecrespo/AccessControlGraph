@@ -14,7 +14,7 @@ namespace AccessControlGraph
     {
         internal readonly UndirectedGraph<T, Edge<T>> Graph = new UndirectedGraph<T, Edge<T>>(false);
 
-        internal readonly object GraphLocker = new object();
+        protected readonly object GraphLocker = new object();
 
         /// <summary>
         /// Запрет инстанцирования напрямую
@@ -70,36 +70,66 @@ namespace AccessControlGraph
                 return Graph.RemoveVertex(v);
         }
 
+        /// <summary>
+        /// Добавить вершину
+        /// </summary>
+        /// <param name="v">True если добавилась</param>
+        /// <returns></returns>
         internal bool AddVertex(T v)
         {
             lock (GraphLocker)
                 return Graph.AddVertex(v);
         }
 
+        /// <summary>
+        /// Содержится ли вершина?
+        /// </summary>
+        /// <param name="v"></param>
+        /// <returns></returns>
         internal bool ContainsVertex(T v)
         {
             lock (GraphLocker)
                 return Graph.ContainsVertex(v);
         }
 
+        /// <summary>
+        /// Попытаться удалить вершину
+        /// </summary>
+        /// <param name="v">True если вершина была и удалилась, False в других случаях</param>
+        /// <returns></returns>
         internal bool TryRemoveVertex(T v)
         {
             lock (GraphLocker)
                 return Graph.ContainsVertex(v) && Graph.RemoveVertex(v);
         }
 
+        /// <summary>
+        /// Удалить грань
+        /// </summary>
+        /// <param name="e"></param>
+        /// <returns></returns>
         internal bool RemoveEdge(Edge<T> e)
         {
             lock (GraphLocker)
                 return Graph.RemoveEdge(e);
         }
 
+        /// <summary>
+        /// Добавить грань и прилегающие к ней вершины в граф
+        /// </summary>
+        /// <param name="e"></param>
+        /// <returns></returns>
         internal bool AddVerticesAndEdge(Edge<T> e)
         {
             lock (GraphLocker)
                 return Graph.AddVerticesAndEdge(e);
         }
 
+        /// <summary>
+        /// Добавить грани и прилегающие к ним вершины в граф
+        /// </summary>
+        /// <param name="edges"></param>
+        /// <returns></returns>
         internal int AddVerticesAndEdgeRange(IEnumerable<Edge<T>> edges)
         {
             lock (GraphLocker)

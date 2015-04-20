@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2013
+VisualStudioVersion = 12.0.31101.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AccessControlGraph", "AccessControlGraph\AccessControlGraph.csproj", "{C11B2F0F-B2B1-4D22-9B7F-9ADA75137474}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AccessControlGraph.Tests", "AccessControlGraph.Tests\AccessControlGraph.Tests.csproj", "{2F2A9C4B-1661-4E47-AEFD-6AA5A3CAB78C}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{C11B2F0F-B2B1-4D22-9B7F-9ADA75137474}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C11B2F0F-B2B1-4D22-9B7F-9ADA75137474}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C11B2F0F-B2B1-4D22-9B7F-9ADA75137474}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C11B2F0F-B2B1-4D22-9B7F-9ADA75137474}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2F2A9C4B-1661-4E47-AEFD-6AA5A3CAB78C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2F2A9C4B-1661-4E47-AEFD-6AA5A3CAB78C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2F2A9C4B-1661-4E47-AEFD-6AA5A3CAB78C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2F2A9C4B-1661-4E47-AEFD-6AA5A3CAB78C}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

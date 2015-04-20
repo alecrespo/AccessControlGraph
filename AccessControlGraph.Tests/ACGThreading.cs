@@ -94,8 +94,8 @@ namespace AccessControlGraph.Tests
                 }));
                 Task.WaitAll(tasks.ToArray());                
             };            
-            var notcached = MeasureTimeSpan(op); //00:00:01.600
-            var cached = MeasureTimeSpan(op); //00:00:00.02
+            var notcached = MeasureTimeSpan(op); 
+            var cached = MeasureTimeSpan(op);
         }
 
         [Test]
@@ -134,9 +134,7 @@ namespace AccessControlGraph.Tests
             Assert.That(_graph.Vertices.Count() == 3280); //mathematically counted to right amount if there was deleted all odd values;
             Assert.That(_graph.Edges.Count() == 1456);
 
-            var count = 0;
-            foreach (var cacheValue in _graph.Cache.Values)
-                count += cacheValue.Graph.Vertices.Count();
+            var count = _graph.Cache.Values.Sum(cacheValue => cacheValue.Graph.Vertices.Count());
             Assert.That(count == 3280, "all subgraphs must contain same vertexes count as parent graph"); 
         }
     }
