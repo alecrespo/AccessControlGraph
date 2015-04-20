@@ -8,16 +8,23 @@ namespace AccessControlGraph.Tests
     {
         public readonly int Id;
 
+        private readonly object _locker = new object();
+
         private string _testData;
+
         public string Testdata {
             get
             {
-                return _testData;
+                lock (_locker)
+                    return _testData;
             }
             set
             {
-                _testData = value;
-                OnPropertyChanged();
+                lock (_locker)
+                {
+                    _testData = value;
+                    OnPropertyChanged();
+                }
             } 
         }
 
